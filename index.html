@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ResuMax AI - Premium Resume Optimizer & ATS Scanner</title>
+
+  <!-- Premium Styles -->
+  <link rel="stylesheet" href="index.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- PDF.js CDN (For client-side PDF text extraction) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+  <!-- html2pdf.js CDN (For premium PDF generation & print downloads) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo-icon">R</div>
+        <span class="logo-text">ResuMax AI</span>
+      </div>
+
+      <nav class="nav-list">
+        <a href="#dashboard" class="nav-item active" data-view="dashboard">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="#optimizer" class="nav-item" data-view="optimizer">
+          <i data-lucide="file-check-2"></i> ATS Optimizer
+        </a>
+        <a href="#rewriter" class="nav-item" data-view="rewriter">
+          <i data-lucide="sparkles"></i> AI Resume Editor
+        </a>
+        <a href="#coverletter" class="nav-item" data-view="coverletter">
+          <i data-lucide="mail"></i> Cover Letter
+        </a>
+        <a href="#settings" class="nav-item" data-view="settings">
+          <i data-lucide="settings"></i> Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar">U</div>
+          <div class="user-info">
+            <span class="user-name">Professional Tier</span>
+            <span class="user-status">
+              <i data-lucide="award" style="width: 12px; height: 12px;"></i> Active Member
+            </span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <header>
+        <div class="header-title-section">
+          <h1 id="view-title">Dashboard</h1>
+          <p id="view-subtitle">Review your progress and optimize new materials.</p>
+        </div>
+
+        <div class="header-controls">
+          <!-- API Connection Badge -->
+          <div id="api-status-badge" class="api-badge offline">
+            <span class="api-indicator-dot"></span>
+            <span id="api-status-text">Simulation Mode</span>
+          </div>
+
+          <!-- Theme Toggle Button -->
+          <button id="theme-toggle" class="theme-toggle-btn" title="Toggle Theme">
+            <i data-lucide="sun" id="theme-icon-light" style="display:none;"></i>
+            <i data-lucide="moon" id="theme-icon-dark"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="dashboard" class="view-panel active">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-val" id="stat-resumes">0</div>
+            <div class="stat-label">Resumes Parsed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-avg-score">--%</div>
+            <div class="stat-label">Average ATS Score</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" id="stat-optimizations">0</div>
+            <div class="stat-label">AI Rewrites</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Upload History Card -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="history"></i> Recent Optimizations</h2>
+            <div style="overflow-x: auto;">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Document</th>
+                    <th>Target Role</th>
+                    <th>ATS Score</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="history-tbody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem 0;">
+                      No optimized resumes yet. Click "ATS Optimizer" to start!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Templates Card -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="zap"></i> Quick Test Sandbox</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+              Select a quick-start template to pre-fill the optimizer for instant testing:
+            </p>
+            <div class="template-grid">
+              <div class="template-item" data-template="swe">
+                <span class="template-title">Software Engineer</span>
+                <span class="template-desc">React, Node.js, Systems Design</span>
+              </div>
+              <div class="template-item" data-template="pm">
+                <span class="template-title">Product Manager</span>
+                <span class="template-desc">Roadmaps, Strategy, Agile Scrum</span>
+              </div>
+              <div class="template-item" data-template="da">
+                <span class="template-title">Data Analyst</span>
+                <span class="template-desc">SQL, Tableau, Predictive Models</span>
+              </div>
+              <div class="template-item" data-template="mkt">
+                <span class="template-title">Growth Marketer</span>
+                <span class="template-desc">SEO/SEM, Ads, User Acquisition</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ATS OPTIMIZER -->
+      <section id="optimizer" class="view-panel">
+        <!-- Input section -->
+        <div class="optimizer-grid" id="input-section">
+          <!-- Step 1: Upload Resume -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="file-text"></i> Step 1: Resume Upload</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Upload your existing resume in PDF format to parse and analyze text.
+            </p>
+
+            <div id="dropzone" class="dropzone">
+              <i data-lucide="upload-cloud" class="dropzone-icon"></i>
+              <span class="dropzone-text">Drag and drop your PDF resume here, or <strong
+                  style="color:var(--brand-indigo);">browse</strong></span>
+              <span class="dropzone-sub">Supports PDF documents up to 5MB</span>
+              <input type="file" id="file-input" accept="application/pdf" style="display: none;">
+            </div>
+
+            <!-- Upload progress / file status -->
+            <div id="upload-status-banner" class="file-uploaded-banner" style="display: none;">
+              <div class="file-info">
+                <i data-lucide="file-check-2" style="color:var(--success);"></i>
+                <span id="uploaded-filename">my-resume.pdf</span>
+              </div>
+              <button id="btn-remove-file" class="file-remove" title="Remove File">
+                <i data-lucide="x-circle"></i>
+              </button>
+            </div>
+
+            <div style="margin-top: 1.5rem;">
+              <label class="editor-label">Extracted Resume Text Preview</label>
+              <textarea id="parsed-resume-text" class="textarea-input"
+                placeholder="Extracted text will appear here automatically after uploading a PDF. You can also paste or edit the text directly here..."></textarea>
+            </div>
+          </div>
+
+          <!-- Step 2: Paste JD -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="briefcase"></i> Step 2: Job Description</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Paste the target job description to match skills, keywords, and relevance.
+            </p>
+
+            <div class="form-group" style="height: calc(100% - 3.5rem); display: flex; flex-direction: column;">
+              <label for="jd-text" class="editor-label" style="display: flex; justify-content: space-between;">
+                <span>Job Description text</span>
+                <span id="jd-word-count" style="text-transform: none; font-weight: normal; color:var(--text-muted);">0
+                  words</span>
+              </label>
+              <textarea id="jd-text" class="textarea-input" style="flex-grow: 1; height: 100%; min-height: 380px;"
+                placeholder="Paste the job posting requirements, responsibilities, and qualifications here..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action triggers -->
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem;" id="action-trigger-row">
+          <button id="btn-run-analysis" class="btn btn-gold btn-lg" style="width: 250px; padding: 1rem 1.5rem;"
+            disabled>
+            <i data-lucide="line-chart"></i> Run ATS Audit
+          </button>
+        </div>
+
+        <!-- Analysis Results section -->
+        <div id="results-section" style="display: none; flex-direction: column; gap: 2rem;">
+          <div class="card">
+            <div class="analysis-header">
+              <div class="analysis-score-block">
+                <div class="score-ring-container">
+                  <svg class="score-ring" width="120" height="120">
+                    <circle class="score-ring-bg" cx="60" cy="60" r="50"></circle>
+                    <circle id="score-ring-bar" class="score-ring-bar" cx="60" cy="60" r="50" stroke-dasharray="314.16"
+                      stroke-dashoffset="314.16"></circle>
+                  </svg>
+                  <div class="score-value-overlay">
+                    <span class="score-num" id="score-pct">0</span><span
+                      style="font-size:1.1rem; font-weight:700;">%</span>
+                    <div class="score-lbl">Match</div>
+                  </div>
+                </div>
+                <div>
+                  <h3
+                    style="font-family: var(--font-family-display); font-size: 1.4rem; font-weight:600; margin-bottom:0.25rem;"
+                    id="score-status-heading">Resume Optimization Score</h3>
+                  <p style="color:var(--text-secondary); font-size:0.9rem;" id="score-feedback-text">Scanning metrics
+                    match standard target profiles.</p>
+                </div>
+              </div>
+
+              <!-- Score breakdown -->
+              <div class="score-breakdown-list">
+                <div class="breakdown-row">
+                  <div class="breakdown-lbl-row">
+                    <span>Keyword Density Match</span>
+                    <span id="val-match-kw">0%</span>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div id="bar-match-kw" class="progress-bar-fill"></div>
+                  </div>
+                </div>
+                <div class="breakdown-row">
+                  <div class="breakdown-lbl-row">
+                    <span>Formatting & ATS Parsability</span>
+                    <span id="val-match-fmt">0%</span>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div id="bar-match-fmt" class="progress-bar-fill"></div>
+                  </div>
+                </div>
+                <div class="breakdown-row">
+                  <div class="breakdown-lbl-row">
+                    <span>Hard Skill Alignment</span>
+                    <span id="val-match-hard">0%</span>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div id="bar-match-hard" class="progress-bar-fill"></div>
+                  </div>
+                </div>
+                <div class="breakdown-row">
+                  <div class="breakdown-lbl-row">
+                    <span>Experience Relevance</span>
+                    <span id="val-match-exp">0%</span>
+                  </div>
+                  <div class="progress-bar-container">
+                    <div id="bar-match-exp" class="progress-bar-fill"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analysis breakdown badges / comments -->
+            <div class="keyword-section">
+              <!-- Missing Keywords -->
+              <div>
+                <h4
+                  style="font-size:1rem; font-weight:600; color:var(--error); display:flex; align-items:center; gap:0.5rem;">
+                  <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Critical Missing Keywords
+                </h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem;">
+                  Adding these terms will increase your ATS relevance score:
+                </p>
+                <div class="badge-grid" id="missing-badges-grid">
+                  <!-- Badges inserted programmatically -->
+                </div>
+              </div>
+
+              <!-- Found Keywords -->
+              <div>
+                <h4
+                  style="font-size:1rem; font-weight:600; color:var(--success); display:flex; align-items:center; gap:0.5rem;">
+                  <i data-lucide="check-circle-2" style="width: 18px; height: 18px;"></i> Matched Keywords
+                </h4>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.25rem;">
+                  These key concepts were found successfully in your resume:
+                </p>
+                <div class="badge-grid" id="found-badges-grid">
+                  <!-- Badges inserted programmatically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Formatting warnings -->
+            <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+              <h4
+                style="font-size:1.1rem; font-weight:600; display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                <i data-lucide="layout" style="width: 20px; height: 20px; color:var(--brand-indigo);"></i> Layout &
+                Parsability Report
+              </h4>
+              <div class="formatting-issues-list" id="formatting-issues-container">
+                <!-- Issues loaded programmatically -->
+              </div>
+            </div>
+
+            <!-- Quick optimizer actions -->
+            <div
+              style="display:flex; justify-content:flex-end; gap:1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+              <button id="btn-back-to-input" class="btn btn-secondary">
+                <i data-lucide="arrow-left"></i> Edit Inputs
+              </button>
+              <button id="btn-goto-cover-letter" class="btn btn-secondary">
+                <i data-lucide="mail"></i> Draft Cover Letter
+              </button>
+              <button id="btn-goto-optimize" class="btn btn-gold">
+                <i data-lucide="sparkles"></i> AI Rewrite Resume
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: AI RESUME REWRITER -->
+      <section id="rewriter" class="view-panel">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <p style="font-size: 0.9rem; color: var(--text-secondary);">
+            Edit the AI-optimized resume. Toggle between raw markdown and printable A4 page view.
+          </p>
+          <div style="display:flex; gap:0.5rem;">
+            <button id="btn-toggle-editor-view" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1rem;">
+              <i data-lucide="eye"></i> Toggle Printable Preview
+            </button>
+          </div>
+        </div>
+
+        <div class="rewriter-grid">
+          <!-- Left Panel: Original Text -->
+          <div class="editor-panel">
+            <div class="editor-card">
+              <div class="editor-header-bar">
+                <span>Original Resume Text (Read-Only)</span>
+                <span id="original-word-count">0 words</span>
+              </div>
+              <textarea id="rewriter-original-text" class="editor-textarea" readonly
+                placeholder="No resume loaded. Upload a resume first."></textarea>
+            </div>
+            <!-- Left Panel controls -->
+            <div style="display:flex; margin-top: 1rem;">
+              <button id="btn-trigger-reoptimize" class="btn btn-secondary" style="width: 100%;">
+                <i data-lucide="refresh-cw"></i> Regenerate Optimization
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Panel: Optimized Resume (Markdown Editor / Printable Paper View) -->
+          <div class="editor-panel">
+            <div class="editor-card" id="optimized-editor-card">
+              <div class="editor-header-bar">
+                <span>Optimized Resume (Edit Mode)</span>
+                <span id="optimized-word-count">0 words</span>
+              </div>
+              <textarea id="rewriter-optimized-markdown" class="editor-textarea"
+                placeholder="AI Optimized output will appear here. You can edit the text directly."></textarea>
+            </div>
+
+            <!-- Paper sheet preview (hidden by default) -->
+            <div class="editor-card" id="optimized-preview-card" style="display: none; height: 100%;">
+              <div class="editor-header-bar">
+                <span>Printable Page View (A4 Aspect Ratio)</span>
+                <span>Click text to edit directly</span>
+              </div>
+              <div class="paper-preview-container">
+                <div id="resume-paper-sheet" class="paper-sheet" contenteditable="true">
+                  <!-- Rendered resume text -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Panel controls -->
+            <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top: 1rem;">
+              <button id="btn-copy-optimized" class="btn btn-secondary">
+                <i data-lucide="copy"></i> Copy Text
+              </button>
+              <button id="btn-download-resume-pdf" class="btn btn-primary">
+                <i data-lucide="download"></i> Download PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: COVER LETTER -->
+      <section id="coverletter" class="view-panel">
+        <!-- Settings toolbar -->
+        <div class="cl-customization-bar">
+          <div class="bar-control">
+            <label for="cl-tone">Tone & Personality</label>
+            <select id="cl-tone" class="select-dropdown">
+              <option value="Professional" selected>Professional & Traditional</option>
+              <option value="Enthusiastic">Enthusiastic & High Energy</option>
+              <option value="Confident">Confident & Assertive</option>
+              <option value="Minimalist">Short & Minimalist</option>
+            </select>
+          </div>
+
+          <div class="bar-control">
+            <label for="cl-length">Target Length</label>
+            <select id="cl-length" class="select-dropdown">
+              <option value="Short">Short (1-2 Paragraphs)</option>
+              <option value="Standard" selected>Standard (3 Paragraphs)</option>
+              <option value="Detailed">Detailed (4+ Paragraphs)</option>
+            </select>
+          </div>
+
+          <button id="btn-generate-cl" class="btn btn-gold" style="margin-left: auto;">
+            <i data-lucide="sparkles"></i> Generate Cover Letter
+          </button>
+        </div>
+
+        <!-- Rendered sheet -->
+        <div class="editor-card" style="height: 580px; display: flex; flex-direction: column;">
+          <div class="editor-header-bar">
+            <span>A4 Document Preview</span>
+            <span>Click inside to edit contents before exporting</span>
+          </div>
+          <div class="paper-preview-container">
+            <div id="coverletter-paper-sheet" class="paper-sheet" contenteditable="true" style="min-height: auto;">
+              <!-- Generated cover letter text -->
+              <div
+                style="color:var(--text-muted); text-align:center; padding-top: 5rem; font-family:var(--font-family-sans);">
+                Upload a resume and paste a job description, then click "Generate Cover Letter" to generate a tailored
+                document.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top: 1.5rem;">
+          <button id="btn-copy-cl" class="btn btn-secondary">
+            <i data-lucide="copy"></i> Copy Draft
+          </button>
+          <button id="btn-download-cl-pdf" class="btn btn-primary">
+            <i data-lucide="download"></i> Download PDF
+          </button>
+        </div>
+      </section>
+
+      <!-- VIEW: SETTINGS -->
+      <section id="settings" class="view-panel">
+        <div class="settings-grid">
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="key-round"></i> API Settings</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Configure your Google Gemini API Key to enable real AI-powered optimization. Without an API Key, the
+              application runs in local simulation mode.
+            </p>
+
+            <div class="form-group">
+              <label for="gemini-key">Gemini Developer API Key</label>
+              <div style="position: relative; display: flex;">
+                <input type="password" id="gemini-key" class="input-text" placeholder="AIzaSy..."
+                  style="padding-right: 2.5rem;">
+                <button id="btn-toggle-key-visibility"
+                  style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                  <i data-lucide="eye" style="width: 16px; height: 16px;" id="eye-icon"></i>
+                </button>
+              </div>
+              <small style="color: var(--text-muted); margin-top: 0.25rem;">
+                Your API key is stored safely in your browser (localStorage) and never transmitted to our servers.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="gemini-model">Select Model</label>
+              <select id="gemini-model" class="select-dropdown" style="width: 100%; padding: 0.75rem 1rem;">
+                <option value="gemini-1.5-flash" selected>gemini-1.5-flash (Fast, ideal for quick optimization)</option>
+                <option value="gemini-2.5-flash">gemini-2.5-flash (Balanced performance and speed)</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro (Deep reasoning, slower generation)</option>
+              </select>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-top: 2rem;">
+              <button id="btn-clear-key" class="btn btn-secondary">Clear Key</button>
+              <button id="btn-save-settings" class="btn btn-gold">Save Settings</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="info"></i> Privacy & Usage</h2>
+            <div
+              style="font-size: 0.85rem; color: var(--text-secondary); display:flex; flex-direction:column; gap:1rem; line-height: 1.5;">
+              <p>
+                <strong>100% Client-Side:</strong> All data parsing, keyword audits, editing, and exports occur entirely
+                within your web browser. No resume text is stored on external databases.
+              </p>
+              <p>
+                <strong>Getting a Key:</strong> You can obtain a free Gemini API Key from Google AI Studio. The free
+                tier includes high rate limits, perfect for personal resume refinement.
+              </p>
+              <p>
+                <strong>Offline Simulation:</strong> If you don't configure a key, our built-in NLP parser scans and
+                highlights common resume pitfalls, injecting relevant role-specific skills.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Loading indicator -->
+  <div id="loading-overlay" class="loader-overlay">
+    <div class="loader-spinner"></div>
+    <div id="loading-text" class="loader-text">Analyzing resume data...</div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Core App Logic -->
+  <script type="module" src="app.js?v=1.0.1"></script>
+
+</body>
+
+</html>
